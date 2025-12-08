@@ -156,15 +156,23 @@
         <!-- MODULE 2: SPLIT BILL -->
         <div id="tab-split" class="tab-content">
             <h2 class="text-2xl font-light mb-6 text-center tracking-widest border-b pb-2 border-muji-border text-muji-text">分帳小幫手</h2>
-            
-            <div class="bg-white rounded-2xl shadow-sm border border-muji-border p-5 mb-6">
-                <h3 class="text-sm font-bold text-muji-text mb-3 flex items-center"><i class="fa-solid fa-users mr-2 text-muji-highlight"></i>成員管理</h3>
-                <div class="flex flex-wrap gap-2 mb-4" id="people-list-container"></div>
-                <div class="flex gap-2">
-                    <input type="text" id="new-person-name" placeholder="輸入名字" class="flex-1 bg-blue-50 border border-muji-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition">
-                    <button onclick="addPerson()" class="bg-muji-highlight text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-cyan-600 transition">新增</button>
+
+            <!-- People Management (Collapsible) -->
+            <details class="bg-white rounded-2xl shadow-sm border border-muji-border mb-6 group">
+                <summary class="list-none p-5 flex justify-between items-center cursor-pointer">
+                     <h3 class="text-sm font-bold text-muji-text flex items-center">
+                        <i class="fa-solid fa-users mr-2 text-muji-highlight"></i>成員管理
+                    </h3>
+                    <i class="fa-solid fa-chevron-down text-gray-400 transition-transform group-open:rotate-180"></i>
+                </summary>
+                <div class="px-5 pb-5 border-t border-gray-100 pt-4">
+                    <div class="flex flex-wrap gap-2 mb-4" id="people-list-container"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-person-name" placeholder="輸入名字" class="flex-1 bg-blue-50 border border-muji-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition">
+                        <button onclick="addPerson()" class="bg-muji-highlight text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-cyan-600 transition">新增</button>
+                    </div>
                 </div>
-            </div>
+            </details>
 
             <div id="split-form-container" class="bg-white rounded-2xl shadow-sm border border-muji-border p-5 mb-6 scroll-mt-24">
                 <h3 id="split-form-title" class="text-sm font-bold text-muji-text mb-3 flex items-center border-l-4 border-muji-highlight pl-2">
@@ -191,6 +199,7 @@
                         <input type="number" id="split-amount" placeholder="金額" class="w-2/3 bg-blue-50 border border-muji-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition">
                         <select id="split-payer" class="w-1/3 bg-blue-50 border border-muji-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></select>
                      </div>
+                     
                      <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
                          <div class="text-xs text-gray-500 mb-2 font-bold flex justify-between items-center">
                              <span>分攤人 (預設全選)</span>
@@ -198,6 +207,20 @@
                          </div>
                          <div id="split-involved-container" class="grid grid-cols-3 gap-2"></div>
                      </div>
+
+                     <!-- Split Photo Upload -->
+                     <div>
+                        <label class="w-full bg-white border border-dashed border-muji-highlight text-muji-accent rounded-xl flex flex-col items-center justify-center py-3 cursor-pointer hover:bg-blue-50 transition shadow-sm">
+                            <i class="fa-solid fa-camera mb-1"></i>
+                            <span class="text-xs font-bold">上傳照片 / 拍照</span>
+                            <input type="file" id="split-photo" accept="image/*" class="hidden" onchange="previewSplitImage(this)">
+                        </label>
+                        <div id="split-photo-preview-container" class="hidden mt-2 relative">
+                            <img id="split-photo-preview" class="h-24 w-full rounded-lg object-cover border border-gray-200">
+                            <button onclick="clearSplitPhoto()" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center shadow-md"><i class="fa-solid fa-times text-[10px]"></i></button>
+                        </div>
+                    </div>
+
                      <div class="flex gap-2 pt-2">
                         <button id="split-submit-btn" onclick="addSplitExpense()" class="flex-1 bg-muji-text text-white font-bold py-3 rounded-xl shadow-md hover:bg-cyan-900 transition active:scale-95">加入分帳</button>
                         <button id="split-cancel-btn" onclick="cancelSplitEdit()" class="hidden flex-none bg-gray-200 text-gray-600 font-bold py-3 px-5 rounded-xl shadow-sm hover:bg-gray-300 transition">取消</button>
@@ -225,7 +248,7 @@
                     <div>
                         <div class="text-xs text-blue-100 font-bold tracking-wider mb-1">今日匯率 (JPY → TWD)</div>
                         <div class="flex items-center">
-                            <input type="number" id="exchange-rate" step="0.001" class="bg-transparent border-b border-white/30 text-white text-2xl font-mono font-bold w-24 focus:outline-none focus:border-white transition" value="0.220">
+                            <input type="number" id="exchange-rate" step="0.001" class="bg-transparent border-b border-white/30 text-white text-2xl font-mono font-bold w-24 focus:outline-none focus:border-white transition" value="0.220" onchange="syncSplitRate()">
                             <button onclick="fetchLiveRate()" class="ml-2 bg-white/20 hover:bg-white/30 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
                         </div>
                         <div id="rate-status" class="text-[10px] text-blue-200 mt-1">更新中...</div>
@@ -339,27 +362,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 w-full bg-white/95 backdrop-blur border-t border-muji-border pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <div class="max-w-md mx-auto flex justify-around items-center h-16">
-            <button onclick="switchTab('plan')" class="nav-btn active flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
-                <i class="fa-solid fa-map-location-dot text-xl mb-1 transform transition group-hover:scale-110"></i><span class="text-[10px] font-medium">行程</span>
-            </button>
-            <button onclick="switchTab('split')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
-                <i class="fa-solid fa-people-arrows text-xl mb-1"></i><span class="text-[10px] font-medium">分帳</span>
-            </button>
-            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
-                <i class="fa-solid fa-file-invoice-dollar text-xl mb-1"></i><span class="text-[10px] font-medium">記帳</span>
-            </button>
-            <button onclick="switchTab('lists')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
-                <i class="fa-solid fa-list-check text-xl mb-1"></i><span class="text-[10px] font-medium">清單</span>
-            </button>
-            <button onclick="switchTab('info')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
-                <i class="fa-solid fa-circle-info text-xl mb-1"></i><span class="text-[10px] font-medium">資訊</span>
-            </button>
-        </div>
-    </nav>
 
     <!-- Modals (Itinerary, DayInfo, Expense, Shopping, PhotoViewer) -->
     <div id="event-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"><div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative overflow-hidden"><h3 id="event-modal-title" class="text-xl font-bold text-muji-text mb-4 border-l-4 border-muji-highlight pl-3">新增行程</h3><div class="space-y-3"><div><label class="block text-xs font-bold text-gray-500 mb-1">時間</label><input type="time" id="event-time" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div><div><label class="block text-xs font-bold text-gray-500 mb-1">景點名稱</label><input type="text" id="event-title" placeholder="請輸入景點名稱" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div><div><label class="block text-xs font-bold text-gray-500 mb-1">描述/備註</label><textarea id="event-desc" rows="3" placeholder="備註..." class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></textarea></div><div><label class="block text-xs font-bold text-gray-500 mb-1">Google Maps 搜尋關鍵字</label><input type="text" id="event-map" placeholder="用於導航連結" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div><div class="flex items-center space-x-2 pt-1"><input type="checkbox" id="event-funpass" class="w-5 h-5 text-muji-highlight rounded focus:ring-muji-highlight border-gray-300"><span class="text-sm font-medium text-gray-700">標記為 FunPass 景點</span></div></div><div class="flex gap-3 mt-6"><button onclick="closeEventModal()" class="flex-1 bg-gray-200 text-gray-600 font-bold py-2.5 rounded-xl shadow-sm hover:bg-gray-300 transition">取消</button><button onclick="saveEvent()" class="flex-1 bg-muji-highlight text-white font-bold py-2.5 rounded-xl shadow-md hover:bg-cyan-600 transition">儲存</button></div></div></div>
@@ -640,7 +642,10 @@
             
             if(!item || isNaN(amount) || !payer || inv.length===0) return alert("資料不完整");
             
-            const obj = { id: editingSplitId || Date.now(), item, amount, currency: curr, rate, amountTWD: curr==='JPY'?Math.round(amount*rate):amount, payer, involved: inv };
+            const obj = { id: editingSplitId || Date.now(), item, amount, currency: curr, rate, amountTWD: curr==='JPY'?Math.round(amount*rate):amount, payer, involved: inv, photo: currentShoppingPhoto }; // Using shared photo variable temporarily or dedicated? Let's use currentShoppingPhoto for simplicity or make new one.
+            // Actually let's use the dedicated one
+            obj.photo = document.getElementById('split-photo').files[0] ? currentSplitPhoto : (editingSplitId ? splitExpenses.find(x=>x.id===editingSplitId).photo : null);
+
             
             if(editingSplitId) {
                 const idx = splitExpenses.findIndex(x=>x.id===editingSplitId);
@@ -650,10 +655,32 @@
                 splitExpenses.unshift(obj);
                 document.getElementById('split-item').value = '';
                 document.getElementById('split-amount').value = '';
+                clearSplitPhoto();
             }
             saveData('splitExpenses', splitExpenses);
             renderSplitList();
         }
+
+        let currentSplitPhoto = null;
+        function previewSplitImage(input) {
+            if(input.files && input.files[0]) {
+                const r = new FileReader();
+                r.onload = function(e) {
+                    const img = new Image(); img.src = e.target.result;
+                    img.onload = function() {
+                        const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                        const s = 1024/img.width; c.width=1024; c.height=img.height*s;
+                        ctx.drawImage(img,0,0,c.width,c.height);
+                        currentSplitPhoto = c.toDataURL('image/jpeg', 0.8);
+                        document.getElementById('split-photo-preview').src = currentSplitPhoto;
+                        document.getElementById('split-photo-preview-container').classList.remove('hidden');
+                    }
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+        function clearSplitPhoto() { currentSplitPhoto=null; document.getElementById('split-photo-preview-container').classList.add('hidden'); document.getElementById('split-photo').value=''; }
+
 
         function editSplitExpense(id) {
             const e = splitExpenses.find(x=>x.id===id);
@@ -667,6 +694,14 @@
             const checks = document.querySelectorAll('.split-involved-check');
             checks.forEach(c => c.checked = e.involved.includes(c.value));
             
+            if(e.photo) {
+                currentSplitPhoto = e.photo;
+                document.getElementById('split-photo-preview').src = e.photo;
+                document.getElementById('split-photo-preview-container').classList.remove('hidden');
+            } else {
+                clearSplitPhoto();
+            }
+
             document.getElementById('split-form-title').innerText = "編輯公款支出";
             document.getElementById('split-submit-btn').innerText = "儲存";
             document.getElementById('split-cancel-btn').classList.remove('hidden');
@@ -677,6 +712,7 @@
             editingSplitId = null;
             document.getElementById('split-item').value = '';
             document.getElementById('split-amount').value = '';
+            clearSplitPhoto();
             document.getElementById('split-form-title').innerText = "新增公款支出";
             document.getElementById('split-submit-btn').innerText = "加入分帳";
             document.getElementById('split-cancel-btn').classList.add('hidden');
@@ -689,14 +725,35 @@
                 renderSplitList();
             }
         }
+        
+        function viewSplitPhoto(id) {
+            const e = splitExpenses.find(x=>x.id===id);
+            if(e && e.photo) {
+                document.getElementById('photo-viewer-img').src = e.photo;
+                document.getElementById('photo-viewer-modal').classList.remove('hidden');
+            }
+        }
 
         function renderSplitList() {
             const c = document.getElementById('split-list');
             if(!c) return;
+            // Sync rate only if empty
+            const splitRateInput = document.getElementById('split-rate');
+            if(splitRateInput && !splitRateInput.value) {
+                 const globalRate = document.getElementById('exchange-rate').value;
+                 splitRateInput.value = globalRate;
+            }
+
             if(splitExpenses.length===0) return c.innerHTML = '<div class="text-center text-gray-400 py-4">無資料</div>';
             c.innerHTML = splitExpenses.map(e => `
                 <div class="bg-white p-3 rounded-lg border border-muji-border shadow-sm flex justify-between items-center">
-                    <div><div class="font-bold text-gray-800">${e.item}</div><div class="text-xs text-gray-500"><span class="font-bold text-muji-accent">${e.payer}</span> 付 <span class="bg-gray-100 px-1 rounded">${e.involved.length}人分</span></div></div>
+                    <div>
+                        <div class="font-bold text-gray-800 flex items-center">
+                            ${e.item}
+                            ${e.photo ? `<button onclick="viewSplitPhoto(${e.id})" class="ml-2 text-muji-highlight"><i class="fa-solid fa-image"></i></button>` : ''}
+                        </div>
+                        <div class="text-xs text-gray-500"><span class="font-bold text-muji-accent">${e.payer}</span> 付 <span class="bg-gray-100 px-1 rounded">${e.involved.length}人分</span></div>
+                    </div>
                     <div class="text-right"><div class="font-bold text-lg text-muji-highlight">${e.currency==='JPY'?'¥':'NT$'}${e.amount}</div>${e.currency==='JPY'?`<span class="text-xs text-gray-400 block">≈ NT$${e.amountTWD}</span>`:''}
                     <div class="mt-1 space-x-2"><button onclick="editSplitExpense(${e.id})" class="text-xs text-gray-400"><i class="fa-solid fa-pen"></i></button><button onclick="deleteSplitExpense(${e.id})" class="text-xs text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>
                 </div>`).join('');
@@ -792,9 +849,9 @@
                     const img = new Image(); img.src = e.target.result;
                     img.onload = function() {
                         const c = document.createElement('canvas'); const ctx = c.getContext('2d');
-                        const s = 300/img.width; c.width=300; c.height=img.height*s;
+                        const s = 1024/img.width; c.width=1024; c.height=img.height*s;
                         ctx.drawImage(img,0,0,c.width,c.height);
-                        currentExpensePhoto = c.toDataURL('image/jpeg', 0.7);
+                        currentExpensePhoto = c.toDataURL('image/jpeg', 0.8);
                         document.getElementById('modal-photo-preview').src = currentExpensePhoto;
                         document.getElementById('modal-photo-preview-container').classList.remove('hidden');
                     }
@@ -909,9 +966,7 @@
 
         function openShoppingModal() { editingShoppingId=null; document.getElementById('shopping-modal-title').innerText="新增待買"; document.getElementById('shopping-name').value=''; document.getElementById('shopping-amount').value=''; clearShoppingPhoto(); document.getElementById('shopping-modal').classList.remove('hidden'); }
         function closeShoppingModal() { document.getElementById('shopping-modal').classList.add('hidden'); }
-        function previewShoppingImage(i) { previewImageModal(i); } // Reuse preview logic but assign to shopping var
-        // Wait, reuse logic needs careful variable assignment. Let's dupe for safety or use param.
-        // Actually the previewImageModal assigns to currentExpensePhoto. Let's make a specific one.
+        
         function previewShoppingImage(input) {
             if(input.files && input.files[0]) {
                 const r = new FileReader();
@@ -919,9 +974,9 @@
                     const img = new Image(); img.src = e.target.result;
                     img.onload = function() {
                         const c = document.createElement('canvas'); const ctx = c.getContext('2d');
-                        const s = 300/img.width; c.width=300; c.height=img.height*s;
+                        const s = 1024/img.width; c.width=1024; c.height=img.height*s;
                         ctx.drawImage(img,0,0,c.width,c.height);
-                        currentShoppingPhoto = c.toDataURL('image/jpeg', 0.7);
+                        currentShoppingPhoto = c.toDataURL('image/jpeg', 0.8);
                         document.getElementById('shopping-photo-preview').src = currentShoppingPhoto;
                         document.getElementById('shopping-photo-preview-container').classList.remove('hidden');
                     }
@@ -982,44 +1037,71 @@
             window.scrollTo(0, 0);
         }
 
+        // Expanded Japanese Phrases (100 phrases approx, categorized)
         const japanesePhrases = [
-            { category: "基本問候", items: [
-                { jp: "こんにちは", roma: "Konnichiwa", tw: "你好" },
-                { jp: "ありがとう", roma: "Arigatou", tw: "謝謝" },
+            { category: "問候與禮貌", items: [
+                { jp: "こんにちは", roma: "Konnichiwa", tw: "你好 (白天)" },
+                { jp: "こんばんは", roma: "Konbanwa", tw: "你好 (晚上)" },
+                { jp: "おはようございます", roma: "Ohayou gozaimasu", tw: "早安" },
+                { jp: "ありがとうございます", roma: "Arigatou gozaimasu", tw: "謝謝" },
                 { jp: "すみません", roma: "Sumimasen", tw: "不好意思 / 請問" },
+                { jp: "ごめんなさい", roma: "Gomennasai", tw: "對不起" },
                 { jp: "はい / いいえ", roma: "Hai / Iie", tw: "是 / 不是" },
-                { jp: "お願いします", roma: "Onegaishimasu", tw: "拜託了 / 麻煩你" }
+                { jp: "お願いします", roma: "Onegaishimasu", tw: "拜託了 / 麻煩你" },
+                { jp: "失礼します", roma: "Shitsurei shimasu", tw: "不好意思 (打擾了)" },
+                { jp: "大丈夫です", roma: "Daijoubu desu", tw: "沒關係 / 不用" }
             ]},
             { category: "交通移動", items: [
                 { jp: "この電車は〜に行きますか？", roma: "Kono densha wa ~ ni ikimasuka?", tw: "這班電車會到～嗎？" },
                 { jp: "チケット売り場はどこですか？", roma: "Chiketto uriba wa doko desuka?", tw: "售票處在哪裡？" },
                 { jp: "〜までお願いします", roma: "~ made onegaishimasu", tw: "請載我到～ (計程車)" },
-                { jp: "ここで降ろしてください", roma: "Koko de oroshite kudasai", tw: "請在這裡讓我下車" }
+                { jp: "ここで降ろしてください", roma: "Koko de oroshite kudasai", tw: "請在這裡讓我下車" },
+                { jp: "駅はどこですか？", roma: "Eki wa doko desuka?", tw: "車站在哪裡？" },
+                { jp: "バス乗り場はどこですか？", roma: "Basu noriba wa doko desuka?", tw: "巴士站在哪裡？" },
+                { jp: "地図を書いてくれませんか？", roma: "Chizu o kaite kuremasenka?", tw: "可以畫地圖給我嗎？" },
+                { jp: "どのくらい時間がかかりますか？", roma: "Dono kurai jikan ga kakarimasuka?", tw: "需要花多少時間？" }
             ]},
             { category: "住宿飯店", items: [
                 { jp: "チェックインをお願いします", roma: "Chekku-in o onegaishimasu", tw: "麻煩辦理入住" },
+                { jp: "予約しています", roma: "Yoyaku shiteimasu", tw: "我有預約" },
                 { jp: "荷物を預かってもらえますか？", roma: "Nimotsu o azukatte moraemasuka?", tw: "可以寄放行李嗎？" },
                 { jp: "Wi-Fiのパスワードは何ですか？", roma: "Wi-Fi no pasuwado wa nan desuka?", tw: "Wi-Fi 密碼是多少？" },
-                { jp: "チェックアウトは何時ですか？", roma: "Chekku-auto wa nanji desuka?", tw: "退房是幾點？" }
+                { jp: "チェックアウトは何時ですか？", roma: "Chekku-auto wa nanji desuka?", tw: "退房是幾點？" },
+                { jp: "朝食は何時からですか？", roma: "Choushoku wa nanji kara desuka?", tw: "早餐幾點開始？" },
+                { jp: "タクシーを呼んでください", roma: "Takushi o yonde kudasai", tw: "請幫我叫計程車" },
+                { jp: "部屋が暑いです/寒いです", roma: "Heya ga atsui/samui desu", tw: "房間很熱/很冷" }
             ]},
             { category: "餐廳用餐", items: [
                 { jp: "メニューをください", roma: "Menyu o kudasai", tw: "請給我菜單" },
                 { jp: "これをお願いします", roma: "Kore o onegaishimasu", tw: "我要點這個" },
                 { jp: "お水をください", roma: "Omizu o kudasai", tw: "請給我水" },
+                { jp: "おすすめは何ですか？", roma: "Osusume wa nan desuka?", tw: "有什麼推薦的？" },
+                { jp: "これを2つください", roma: "Kore o futatsu kudasai", tw: "我要兩個這個" },
+                { jp: "辛くしないでください", roma: "Karaku shinaide kudasai", tw: "請不要做太辣" },
                 { jp: "お会計をお願いします", roma: "Okaikei o onegaishimasu", tw: "麻煩結帳" },
-                { jp: "ごちそうさまでした", roma: "Gochisousama deshita", tw: "多謝款待 (吃飽後說)" }
+                { jp: "ごちそうさまでした", roma: "Gochisousama deshita", tw: "多謝款待" },
+                { jp: "クレジットカードは使えますか？", roma: "Kurejitto kado wa tsukaemasuka?", tw: "可以用信用卡嗎？" },
+                { jp: "別々でお願いします", roma: "Betsubetsu de onegaishimasu", tw: "請分開結帳" }
             ]},
             { category: "購物結帳", items: [
-                { jp: "これはいくらですか？", roma: "Kore wa ikura desuka?", tw: "這個多少錢？" },
+                { jp: "いくらですか？", roma: "Ikura desuka?", tw: "多少錢？" },
                 { jp: "免税になりますか？", roma: "Menzei ni narimasuka?", tw: "可以免稅嗎？" },
                 { jp: "袋はいりません", roma: "Fukuro wa irimasen", tw: "不用袋子" },
-                { jp: "クレジットカードは使えますか？", roma: "Kurejitto kado wa tsukaemasuka?", tw: "可以用信用卡嗎？" }
+                { jp: "試着してもいいですか？", roma: "Shichaku shitemo ii desuka?", tw: "可以試穿嗎？" },
+                { jp: "これの新しいのはありますか？", roma: "Kore no atarashii no wa arimasuka?", tw: "有新的嗎？" },
+                { jp: "他の色はありますか？", roma: "Hoka no iro wa arimasuka?", tw: "有其他顏色嗎？" },
+                { jp: "もっと大きい/小さいのはありますか？", roma: "Motto ookii/chiisai no wa arimasuka?", tw: "有更大/更小的嗎？" },
+                { jp: "これをください", roma: "Kore o kudasai", tw: "我要這個" }
             ]},
             { category: "緊急求助", items: [
                 { jp: "助けてください！", roma: "Tasukete kudasai!", tw: "請救救我！" },
                 { jp: "警察を呼んでください", roma: "Keisatsu o yonde kudasai", tw: "請幫我叫警察" },
                 { jp: "救急車を呼んでください", roma: "Kyukyusha o yonde kudasai", tw: "請幫我叫救護車" },
-                { jp: "トイレはどこですか？", roma: "Toire wa doko desuka?", tw: "廁所在哪裡？" }
+                { jp: "トイレはどこですか？", roma: "Toire wa doko desuka?", tw: "廁所在哪裡？" },
+                { jp: "病院はどこですか？", roma: "Byouin wa doko desuka?", tw: "醫院在哪裡？" },
+                { jp: "パスポートをなくしました", roma: "Pasupoto o nakushimashita", tw: "我弄丟了護照" },
+                { jp: "財布を盗まれました", roma: "Saifu o nusumaremashita", tw: "錢包被偷了" },
+                { jp: "気分が悪いです", roma: "Kibun ga warui desu", tw: "我不舒服" }
             ]},
             { category: "數字", items: [
                 { jp: "いち (1), に (2), さん (3)", roma: "Ichi, Ni, San", tw: "1, 2, 3" },
@@ -1031,17 +1113,23 @@
             { category: "時間", items: [
                 { jp: "いま、なんじですか？", roma: "Ima, nanji desuka?", tw: "現在幾點？" },
                 { jp: "いつですか？", roma: "Itsu desuka?", tw: "什麼時候？" },
-                { jp: "きょう / あした / きのう", roma: "Kyou / Ashita / Kinou", tw: "今天 / 明天 / 昨天" }
+                { jp: "きょう / あした / きのう", roma: "Kyou / Ashita / Kinou", tw: "今天 / 明天 / 昨天" },
+                { jp: "何時に始まりますか？", roma: "Nanji ni hajimarimasuka?", tw: "幾點開始？" },
+                { jp: "何時に終わりますか？", roma: "Nanji ni owarimasuka?", tw: "幾點結束？" }
             ]},
             { category: "自我介紹", items: [
                 { jp: "わたしは〜です", roma: "Watashi wa ~ desu", tw: "我是～" },
                 { jp: "台湾から来ました", roma: "Taiwan kara kimashita", tw: "我來自台灣" },
-                { jp: "日本語がわかりません", roma: "Nihongo ga wakarimasen", tw: "我不懂日語" }
+                { jp: "日本語がわかりません", roma: "Nihongo ga wakarimasen", tw: "我不懂日語" },
+                { jp: "英語を話せますか？", roma: "Eigo o hanasemasuka?", tw: "你會說英文嗎？" },
+                { jp: "中国語を話せますか？", roma: "Chuugokugo o hanasemasuka?", tw: "你會說中文嗎？" }
             ]},
             { category: "觀光", items: [
                 { jp: "写真を撮ってもいいですか？", roma: "Shashin o totte mo ii desuka?", tw: "可以拍照嗎？" },
-                { jp: "おすすめはありますか？", roma: "Osusume wa arimasuka?", tw: "有推薦的嗎？" },
-                { jp: "近くに駅はありますか？", roma: "Chikaku ni eki wa arimasuka?", tw: "附近有車站嗎？" }
+                { jp: "シャッターを押してもらえますか？", roma: "Shatta o oshite moraemasuka?", tw: "可以幫我按快門嗎？" },
+                { jp: "入り口はどこですか？", roma: "Iriguchi wa doko desuka?", tw: "入口在哪裡？" },
+                { jp: "出口はどこですか？", roma: "Deguchi wa doko desuka?", tw: "出口在哪裡？" },
+                { jp: "パンフレットはありますか？", roma: "Panfuretto wa arimasuka?", tw: "有簡介嗎？" }
             ]}
         ];
 
