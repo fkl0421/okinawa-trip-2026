@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Okinawa Trip 2026</title>
     
-    <!-- PWA Settings for App-like Experience -->
+    <!-- PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
@@ -75,51 +75,25 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
         
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .tab-content {
             display: none;
             animation: fadeIn 0.3s ease-in-out;
             padding-bottom: 100px;
         }
+        .tab-content.active { display: block; }
 
-        .tab-content.active {
-            display: block;
+        /* UI Elements */
+        .category-radio:checked + div, .currency-radio:checked + div, .payment-radio:checked + div, .split-currency-radio:checked + div {
+            background-color: #06B6D4; color: white; border-color: #06B6D4;
         }
-
-        /* Custom UI Elements */
-        .category-radio:checked + div,
-        .currency-radio:checked + div,
-        .payment-radio:checked + div,
-        .split-currency-radio:checked + div {
-            background-color: #06B6D4;
-            color: white;
-            border-color: #06B6D4;
-        }
-
-        .custom-checkbox input:checked + div {
-            background-color: #06B6D4;
-            border-color: #06B6D4;
-        }
+        .custom-checkbox input:checked + div { background-color: #06B6D4; border-color: #06B6D4; }
         .custom-checkbox input:checked + div:after {
-            content: '';
-            display: block;
-            width: 5px;
-            height: 9px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-            position: absolute;
-            top: 2px;
-            left: 5px;
+            content: ''; display: block; width: 5px; height: 9px; border: solid white;
+            border-width: 0 2px 2px 0; transform: rotate(45deg); position: absolute; top: 2px; left: 5px;
         }
-
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] > summary i.fa-chevron-down { transform: rotate(180deg); }
@@ -199,7 +173,6 @@
                         <input type="number" id="split-amount" placeholder="金額" class="w-2/3 bg-blue-50 border border-muji-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition">
                         <select id="split-payer" class="w-1/3 bg-blue-50 border border-muji-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></select>
                      </div>
-                     
                      <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
                          <div class="text-xs text-gray-500 mb-2 font-bold flex justify-between items-center">
                              <span>分攤人 (預設全選)</span>
@@ -207,7 +180,7 @@
                          </div>
                          <div id="split-involved-container" class="grid grid-cols-3 gap-2"></div>
                      </div>
-
+                     
                      <!-- Split Photo Upload -->
                      <div>
                         <label class="w-full bg-white border border-dashed border-muji-highlight text-muji-accent rounded-xl flex flex-col items-center justify-center py-3 cursor-pointer hover:bg-blue-50 transition shadow-sm">
@@ -363,6 +336,27 @@
         </div>
     </main>
 
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full bg-white/95 backdrop-blur border-t border-muji-border pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div class="max-w-md mx-auto flex justify-around items-center h-16">
+            <button onclick="switchTab('plan')" class="nav-btn active flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
+                <i class="fa-solid fa-map-location-dot text-xl mb-1 transform transition group-hover:scale-110"></i><span class="text-[10px] font-medium">行程</span>
+            </button>
+            <button onclick="switchTab('split')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
+                <i class="fa-solid fa-people-arrows text-xl mb-1"></i><span class="text-[10px] font-medium">分帳</span>
+            </button>
+            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
+                <i class="fa-solid fa-file-invoice-dollar text-xl mb-1"></i><span class="text-[10px] font-medium">記帳</span>
+            </button>
+            <button onclick="switchTab('lists')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
+                <i class="fa-solid fa-list-check text-xl mb-1"></i><span class="text-[10px] font-medium">清單</span>
+            </button>
+            <button onclick="switchTab('info')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-muji-accent hover:text-muji-text transition duration-300">
+                <i class="fa-solid fa-circle-info text-xl mb-1"></i><span class="text-[10px] font-medium">資訊</span>
+            </button>
+        </div>
+    </nav>
+
     <!-- Modals (Itinerary, DayInfo, Expense, Shopping, PhotoViewer) -->
     <div id="event-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"><div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative overflow-hidden"><h3 id="event-modal-title" class="text-xl font-bold text-muji-text mb-4 border-l-4 border-muji-highlight pl-3">新增行程</h3><div class="space-y-3"><div><label class="block text-xs font-bold text-gray-500 mb-1">時間</label><input type="time" id="event-time" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div><div><label class="block text-xs font-bold text-gray-500 mb-1">景點名稱</label><input type="text" id="event-title" placeholder="請輸入景點名稱" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div><div><label class="block text-xs font-bold text-gray-500 mb-1">描述/備註</label><textarea id="event-desc" rows="3" placeholder="備註..." class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></textarea></div><div><label class="block text-xs font-bold text-gray-500 mb-1">Google Maps 搜尋關鍵字</label><input type="text" id="event-map" placeholder="用於導航連結" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div><div class="flex items-center space-x-2 pt-1"><input type="checkbox" id="event-funpass" class="w-5 h-5 text-muji-highlight rounded focus:ring-muji-highlight border-gray-300"><span class="text-sm font-medium text-gray-700">標記為 FunPass 景點</span></div></div><div class="flex gap-3 mt-6"><button onclick="closeEventModal()" class="flex-1 bg-gray-200 text-gray-600 font-bold py-2.5 rounded-xl shadow-sm hover:bg-gray-300 transition">取消</button><button onclick="saveEvent()" class="flex-1 bg-muji-highlight text-white font-bold py-2.5 rounded-xl shadow-md hover:bg-cyan-600 transition">儲存</button></div></div></div>
     <div id="day-modal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"><div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative overflow-hidden"><h3 class="text-xl font-bold text-muji-text mb-4 border-l-4 border-muji-highlight pl-3">編輯單日資訊</h3><div class="space-y-3"><div><label class="block text-xs font-bold text-gray-500 mb-1">日期</label><input type="text" id="day-date" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div><div><label class="block text-xs font-bold text-gray-500 mb-1">主題 (Title)</label><input type="text" id="day-title" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div><div><label class="block text-xs font-bold text-gray-500 mb-1">標籤 (Tag)</label><input type="text" id="day-tag" class="w-full bg-blue-50 border border-muji-border rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition"></div></div><div class="flex gap-3 mt-6"><button onclick="closeDayModal()" class="flex-1 bg-gray-200 text-gray-600 font-bold py-2.5 rounded-xl shadow-sm hover:bg-gray-300 transition">取消</button><button onclick="saveDayInfo()" class="flex-1 bg-muji-highlight text-white font-bold py-2.5 rounded-xl shadow-md hover:bg-cyan-600 transition">儲存</button></div></div></div>
@@ -404,9 +398,6 @@
 
                     // Re-render
                     renderItinerary(); renderPeople(); renderSplitList();
-                    // renderExpenses(); // Local
-                    // renderTodos(); // Local
-                    // renderShoppingList(); // Local
                 }
             });
         };
@@ -966,7 +957,9 @@
 
         function openShoppingModal() { editingShoppingId=null; document.getElementById('shopping-modal-title').innerText="新增待買"; document.getElementById('shopping-name').value=''; document.getElementById('shopping-amount').value=''; clearShoppingPhoto(); document.getElementById('shopping-modal').classList.remove('hidden'); }
         function closeShoppingModal() { document.getElementById('shopping-modal').classList.add('hidden'); }
-        
+        function previewShoppingImage(i) { previewImageModal(i); } // Reuse preview logic but assign to shopping var
+        // Wait, reuse logic needs careful variable assignment. Let's dupe for safety or use param.
+        // Actually the previewImageModal assigns to currentExpensePhoto. Let's make a specific one.
         function previewShoppingImage(input) {
             if(input.files && input.files[0]) {
                 const r = new FileReader();
@@ -1037,101 +1030,7 @@
             window.scrollTo(0, 0);
         }
 
-        // Expanded Japanese Phrases (100 phrases approx, categorized)
-        const japanesePhrases = [
-            { category: "問候與禮貌", items: [
-                { jp: "こんにちは", roma: "Konnichiwa", tw: "你好 (白天)" },
-                { jp: "こんばんは", roma: "Konbanwa", tw: "你好 (晚上)" },
-                { jp: "おはようございます", roma: "Ohayou gozaimasu", tw: "早安" },
-                { jp: "ありがとうございます", roma: "Arigatou gozaimasu", tw: "謝謝" },
-                { jp: "すみません", roma: "Sumimasen", tw: "不好意思 / 請問" },
-                { jp: "ごめんなさい", roma: "Gomennasai", tw: "對不起" },
-                { jp: "はい / いいえ", roma: "Hai / Iie", tw: "是 / 不是" },
-                { jp: "お願いします", roma: "Onegaishimasu", tw: "拜託了 / 麻煩你" },
-                { jp: "失礼します", roma: "Shitsurei shimasu", tw: "不好意思 (打擾了)" },
-                { jp: "大丈夫です", roma: "Daijoubu desu", tw: "沒關係 / 不用" }
-            ]},
-            { category: "交通移動", items: [
-                { jp: "この電車は〜に行きますか？", roma: "Kono densha wa ~ ni ikimasuka?", tw: "這班電車會到～嗎？" },
-                { jp: "チケット売り場はどこですか？", roma: "Chiketto uriba wa doko desuka?", tw: "售票處在哪裡？" },
-                { jp: "〜までお願いします", roma: "~ made onegaishimasu", tw: "請載我到～ (計程車)" },
-                { jp: "ここで降ろしてください", roma: "Koko de oroshite kudasai", tw: "請在這裡讓我下車" },
-                { jp: "駅はどこですか？", roma: "Eki wa doko desuka?", tw: "車站在哪裡？" },
-                { jp: "バス乗り場はどこですか？", roma: "Basu noriba wa doko desuka?", tw: "巴士站在哪裡？" },
-                { jp: "地図を書いてくれませんか？", roma: "Chizu o kaite kuremasenka?", tw: "可以畫地圖給我嗎？" },
-                { jp: "どのくらい時間がかかりますか？", roma: "Dono kurai jikan ga kakarimasuka?", tw: "需要花多少時間？" }
-            ]},
-            { category: "住宿飯店", items: [
-                { jp: "チェックインをお願いします", roma: "Chekku-in o onegaishimasu", tw: "麻煩辦理入住" },
-                { jp: "予約しています", roma: "Yoyaku shiteimasu", tw: "我有預約" },
-                { jp: "荷物を預かってもらえますか？", roma: "Nimotsu o azukatte moraemasuka?", tw: "可以寄放行李嗎？" },
-                { jp: "Wi-Fiのパスワードは何ですか？", roma: "Wi-Fi no pasuwado wa nan desuka?", tw: "Wi-Fi 密碼是多少？" },
-                { jp: "チェックアウトは何時ですか？", roma: "Chekku-auto wa nanji desuka?", tw: "退房是幾點？" },
-                { jp: "朝食は何時からですか？", roma: "Choushoku wa nanji kara desuka?", tw: "早餐幾點開始？" },
-                { jp: "タクシーを呼んでください", roma: "Takushi o yonde kudasai", tw: "請幫我叫計程車" },
-                { jp: "部屋が暑いです/寒いです", roma: "Heya ga atsui/samui desu", tw: "房間很熱/很冷" }
-            ]},
-            { category: "餐廳用餐", items: [
-                { jp: "メニューをください", roma: "Menyu o kudasai", tw: "請給我菜單" },
-                { jp: "これをお願いします", roma: "Kore o onegaishimasu", tw: "我要點這個" },
-                { jp: "お水をください", roma: "Omizu o kudasai", tw: "請給我水" },
-                { jp: "おすすめは何ですか？", roma: "Osusume wa nan desuka?", tw: "有什麼推薦的？" },
-                { jp: "これを2つください", roma: "Kore o futatsu kudasai", tw: "我要兩個這個" },
-                { jp: "辛くしないでください", roma: "Karaku shinaide kudasai", tw: "請不要做太辣" },
-                { jp: "お会計をお願いします", roma: "Okaikei o onegaishimasu", tw: "麻煩結帳" },
-                { jp: "ごちそうさまでした", roma: "Gochisousama deshita", tw: "多謝款待" },
-                { jp: "クレジットカードは使えますか？", roma: "Kurejitto kado wa tsukaemasuka?", tw: "可以用信用卡嗎？" },
-                { jp: "別々でお願いします", roma: "Betsubetsu de onegaishimasu", tw: "請分開結帳" }
-            ]},
-            { category: "購物結帳", items: [
-                { jp: "いくらですか？", roma: "Ikura desuka?", tw: "多少錢？" },
-                { jp: "免税になりますか？", roma: "Menzei ni narimasuka?", tw: "可以免稅嗎？" },
-                { jp: "袋はいりません", roma: "Fukuro wa irimasen", tw: "不用袋子" },
-                { jp: "試着してもいいですか？", roma: "Shichaku shitemo ii desuka?", tw: "可以試穿嗎？" },
-                { jp: "これの新しいのはありますか？", roma: "Kore no atarashii no wa arimasuka?", tw: "有新的嗎？" },
-                { jp: "他の色はありますか？", roma: "Hoka no iro wa arimasuka?", tw: "有其他顏色嗎？" },
-                { jp: "もっと大きい/小さいのはありますか？", roma: "Motto ookii/chiisai no wa arimasuka?", tw: "有更大/更小的嗎？" },
-                { jp: "これをください", roma: "Kore o kudasai", tw: "我要這個" }
-            ]},
-            { category: "緊急求助", items: [
-                { jp: "助けてください！", roma: "Tasukete kudasai!", tw: "請救救我！" },
-                { jp: "警察を呼んでください", roma: "Keisatsu o yonde kudasai", tw: "請幫我叫警察" },
-                { jp: "救急車を呼んでください", roma: "Kyukyusha o yonde kudasai", tw: "請幫我叫救護車" },
-                { jp: "トイレはどこですか？", roma: "Toire wa doko desuka?", tw: "廁所在哪裡？" },
-                { jp: "病院はどこですか？", roma: "Byouin wa doko desuka?", tw: "醫院在哪裡？" },
-                { jp: "パスポートをなくしました", roma: "Pasupoto o nakushimashita", tw: "我弄丟了護照" },
-                { jp: "財布を盗まれました", roma: "Saifu o nusumaremashita", tw: "錢包被偷了" },
-                { jp: "気分が悪いです", roma: "Kibun ga warui desu", tw: "我不舒服" }
-            ]},
-            { category: "數字", items: [
-                { jp: "いち (1), に (2), さん (3)", roma: "Ichi, Ni, San", tw: "1, 2, 3" },
-                { jp: "し/よん (4), ご (5), ろく (6)", roma: "Yon, Go, Roku", tw: "4, 5, 6" },
-                { jp: "しち/なな (7), はち (8), きゅう (9)", roma: "Nana, Hachi, Kyuu", tw: "7, 8, 9" },
-                { jp: "じゅう (10), ひゃく (100)", roma: "Juu, Hyaku", tw: "10, 100" },
-                { jp: "せん (1000), まん (10000)", roma: "Sen, Man", tw: "1000, 10000" }
-            ]},
-            { category: "時間", items: [
-                { jp: "いま、なんじですか？", roma: "Ima, nanji desuka?", tw: "現在幾點？" },
-                { jp: "いつですか？", roma: "Itsu desuka?", tw: "什麼時候？" },
-                { jp: "きょう / あした / きのう", roma: "Kyou / Ashita / Kinou", tw: "今天 / 明天 / 昨天" },
-                { jp: "何時に始まりますか？", roma: "Nanji ni hajimarimasuka?", tw: "幾點開始？" },
-                { jp: "何時に終わりますか？", roma: "Nanji ni owarimasuka?", tw: "幾點結束？" }
-            ]},
-            { category: "自我介紹", items: [
-                { jp: "わたしは〜です", roma: "Watashi wa ~ desu", tw: "我是～" },
-                { jp: "台湾から来ました", roma: "Taiwan kara kimashita", tw: "我來自台灣" },
-                { jp: "日本語がわかりません", roma: "Nihongo ga wakarimasen", tw: "我不懂日語" },
-                { jp: "英語を話せますか？", roma: "Eigo o hanasemasuka?", tw: "你會說英文嗎？" },
-                { jp: "中国語を話せますか？", roma: "Chuugokugo o hanasemasuka?", tw: "你會說中文嗎？" }
-            ]},
-            { category: "觀光", items: [
-                { jp: "写真を撮ってもいいですか？", roma: "Shashin o totte mo ii desuka?", tw: "可以拍照嗎？" },
-                { jp: "シャッターを押してもらえますか？", roma: "Shatta o oshite moraemasuka?", tw: "可以幫我按快門嗎？" },
-                { jp: "入り口はどこですか？", roma: "Iriguchi wa doko desuka?", tw: "入口在哪裡？" },
-                { jp: "出口はどこですか？", roma: "Deguchi wa doko desuka?", tw: "出口在哪裡？" },
-                { jp: "パンフレットはありますか？", roma: "Panfuretto wa arimasuka?", tw: "有簡介嗎？" }
-            ]}
-        ];
+        const japanesePhrases = [{category:"基本問候",items:[{jp:"こんにちは",roma:"Konnichiwa",tw:"你好 (白天)"},{jp:"こんばんは",roma:"Konbanwa",tw:"你好 (晚上)"},{jp:"おはようございます",roma:"Ohayou gozaimasu",tw:"早安"},{jp:"ありがとうございます",roma:"Arigatou gozaimasu",tw:"謝謝"},{jp:"すみません",roma:"Sumimasen",tw:"不好意思 / 請問"},{jp:"ごめんなさい",roma:"Gomennasai",tw:"對不起"},{jp:"はい / いいえ",roma:"Hai / Iie",tw:"是 / 不是"},{jp:"お願いします",roma:"Onegaishimasu",tw:"拜託了 / 麻煩你"},{jp:"失礼します",roma:"Shitsurei shimasu",tw:"不好意思 (打擾了)"},{jp:"大丈夫です",roma:"Daijoubu desu",tw:"沒關係 / 不用"}]},{category:"交通移動",items:[{jp:"この電車は〜に行きますか？",roma:"Kono densha wa ~ ni ikimasuka?",tw:"這班電車會到～嗎？"},{jp:"チケット売り場はどこですか？",roma:"Chiketto uriba wa doko desuka?",tw:"售票處在哪裡？"},{jp:"〜までお願いします",roma:"~ made onegaishimasu",tw:"請載我到～ (計程車)"},{jp:"ここで降ろしてください",roma:"Koko de oroshite kudasai",tw:"請在這裡讓我下車"},{jp:"駅はどこですか？",roma:"Eki wa doko desuka?",tw:"車站在哪裡？"},{jp:"バス乗り場はどこですか？",roma:"Basu noriba wa doko desuka?",tw:"巴士站在哪裡？"},{jp:"地図を書いてくれませんか？",roma:"Chizu o kaite kuremasenka?",tw:"可以畫地圖給我嗎？"},{jp:"どのくらい時間がかかりますか？",roma:"Dono kurai jikan ga kakarimasuka?",tw:"需要花多少時間？"}]},{category:"住宿飯店",items:[{jp:"チェックインをお願いします",roma:"Chekku-in o onegaishimasu",tw:"麻煩辦理入住"},{jp:"予約しています",roma:"Yoyaku shiteimasu",tw:"我有預約"},{jp:"荷物を預かってもらえますか？",roma:"Nimotsu o azukatte moraemasuka?",tw:"可以寄放行李嗎？"},{jp:"Wi-Fiのパスワードは何ですか？",roma:"Wi-Fi no pasuwado wa nan desuka?",tw:"Wi-Fi 密碼是多少？"},{jp:"チェックアウトは何時ですか？",roma:"Chekku-auto wa nanji desuka?",tw:"退房是幾點？"},{jp:"朝食は何時からですか？",roma:"Choushoku wa nanji kara desuka?",tw:"早餐幾點開始？"},{jp:"タクシーを呼んでください",roma:"Takushi o yonde kudasai",tw:"請幫我叫計程車"},{jp:"部屋が暑いです/寒いです",roma:"Heya ga atsui/samui desu",tw:"房間很熱/很冷"}]},{category:"餐廳用餐",items:[{jp:"メニューをください",roma:"Menyu o kudasai",tw:"請給我菜單"},{jp:"これをお願いします",roma:"Kore o onegaishimasu",tw:"我要點這個"},{jp:"お水をください",roma:"Omizu o kudasai",tw:"請給我水"},{jp:"おすすめは何ですか？",roma:"Osusume wa nan desuka?",tw:"有什麼推薦的？"},{jp:"これを2つください",roma:"Kore o futatsu kudasai",tw:"我要兩個這個"},{jp:"辛くしないでください",roma:"Karaku shinaide kudasai",tw:"請不要做太辣"},{jp:"お会計をお願いします",roma:"Okaikei o onegaishimasu",tw:"麻煩結帳"},{jp:"ごちそうさまでした",roma:"Gochisousama deshita",tw:"多謝款待"},{jp:"クレジットカードは使えますか？",roma:"Kurejitto kado wa tsukaemasuka?",tw:"可以用信用卡嗎？"},{jp:"別々でお願いします",roma:"Betsubetsu de onegaishimasu",tw:"請分開結帳"}]},{category:"購物結帳",items:[{jp:"いくらですか？",roma:"Ikura desuka?",tw:"多少錢？"},{jp:"免税になりますか？",roma:"Menzei ni narimasuka?",tw:"可以免稅嗎？"},{jp:"袋はいりません",roma:"Fukuro wa irimasen",tw:"不用袋子"},{jp:"試着してもいいですか？",roma:"Shichaku shitemo ii desuka?",tw:"可以試穿嗎？"},{jp:"これの新しいのはありますか？",roma:"Kore no atarashii no wa arimasuka?",tw:"有新的嗎？"},{jp:"他の色はありますか？",roma:"Hoka no iro wa arimasuka?",tw:"有其他顏色嗎？"},{jp:"もっと大きい/小さいのはありますか？",roma:"Motto ookii/chiisai no wa arimasuka?",tw:"有更大/更小的嗎？"},{jp:"これをください",roma:"Kore o kudasai",tw:"我要這個"}]},{category:"緊急求助",items:[{jp:"助けてください！",roma:"Tasukete kudasai!",tw:"請救救我！"},{jp:"警察を呼んでください",roma:"Keisatsu o yonde kudasai",tw:"請幫我叫警察"},{jp:"救急車を呼んでください",roma:"Kyukyusha o yonde kudasai",tw:"請幫我叫救護車"},{jp:"トイレはどこですか？",roma:"Toire wa doko desuka?",tw:"廁所在哪裡？"},{jp:"病院はどこですか？",roma:"Byouin wa doko desuka?",tw:"醫院在哪裡？"},{jp:"パスポートをなくしました",roma:"Pasupoto o nakushimashita",tw:"我弄丟了護照"},{jp:"財布を盗まれました",roma:"Saifu o nusumaremashita",tw:"錢包被偷了"},{jp:"気分が悪いです",roma:"Kibun ga warui desu",tw:"我不舒服"}]},{category:"數字",items:[{jp:"いち (1), に (2), さん (3)",roma:"Ichi, Ni, San",tw:"1, 2, 3"},{jp:"し/よん (4), ご (5), ろく (6)",roma:"Yon, Go, Roku",tw:"4, 5, 6"},{jp:"しち/なな (7), はち (8), きゅう (9)",roma:"Nana, Hachi, Kyuu",tw:"7, 8, 9"},{jp:"じゅう (10), ひゃく (100)",roma:"Juu, Hyaku",tw:"10, 100"},{jp:"せん (1000), まん (10000)",roma:"Sen, Man",tw:"1000, 10000"}]},{category:"時間",items:[{jp:"いま、なんじですか？",roma:"Ima, nanji desuka?",tw:"現在幾點？"},{jp:"いつですか？",roma:"Itsu desuka?",tw:"什麼時候？"},{jp:"きょう / あした / きのう",roma:"Kyou / Ashita / Kinou",tw:"今天 / 明天 / 昨天"},{jp:"何時に始まりますか？",roma:"Nanji ni hajimarimasuka?",tw:"幾點開始？"},{jp:"何時に終わりますか？",roma:"Nanji ni owarimasuka?",tw:"幾點結束？"}]},{category:"自我介紹",items:[{jp:"わたしは〜です",roma:"Watashi wa ~ desu",tw:"我是～"},{jp:"台湾から来ました",roma:"Taiwan kara kimashita",tw:"我來自台灣"},{jp:"日本語がわかりません",roma:"Nihongo ga wakarimasen",tw:"我不懂日語"},{jp:"英語を話せますか？",roma:"Eigo o hanasemasuka?",tw:"你會說英文嗎？"},{jp:"中国語を話せますか？",roma:"Chuugokugo o hanasemasuka?",tw:"你會說中文嗎？"}]},{category:"觀光",items:[{jp:"写真を撮ってもいいですか？",roma:"Shashin o totte mo ii desuka?",tw:"可以拍照嗎？"},{jp:"シャッターを押してもらえますか？",roma:"Shatta o oshite moraemasuka?",tw:"可以幫我按快門嗎？"},{jp:"入り口はどこですか？",roma:"Iriguchi wa doko desuka?",tw:"入口在哪裡？"},{jp:"出口はどこですか？",roma:"Deguchi wa doko desuka?",tw:"出口在哪裡？"},{jp:"パンフレットはありますか？",roma:"Panfuretto wa arimasuka?",tw:"有簡介嗎？"}]}];
 
         function renderJapanesePhrases() {
             document.getElementById('japanese-phrases-container').innerHTML = japanesePhrases.map((c,i) => `
