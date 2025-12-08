@@ -385,71 +385,49 @@
         window.db = null;
         const TRIP_ID = 'okinawa_trip_data';
 
-        try {
-            const app = initializeApp(firebaseConfig);
-            window.db = getFirestore(app);
-            const analytics = getAnalytics(app);
-            
-            // Start listening to DB changes
-            initFirebaseListener();
-            updateSyncStatus(true);
-        } catch (e) {
-            console.error("Firebase Init Error", e);
-            updateSyncStatus(false);
-        }
-
-        function updateSyncStatus(connected) {
-            const el = document.getElementById('sync-status-indicator');
-            if (connected) {
-                el.innerHTML = '<i class="fa-solid fa-cloud mr-1 text-green-400"></i>已連線同步中';
-            } else {
-                el.innerHTML = '<i class="fa-solid fa-mobile-screen mr-1 text-gray-400"></i>離線模式';
-            }
-        }
-
-        function initFirebaseListener() {
+        // Make listeners available globally to be safe
+        window.initFirebaseListener = function() {
             if (!window.db) return;
-            
-            // Listen for changes from Cloud
             onSnapshot(doc(window.db, "trips", TRIP_ID), (doc) => {
                 if (doc.exists()) {
                     const data = doc.data();
-                    
-                    // Update local variables from Cloud
                     if(data.itinerary) itineraryData = JSON.parse(data.itinerary);
                     if(data.people) people = JSON.parse(data.people);
                     if(data.splitExpenses) splitExpenses = JSON.parse(data.splitExpenses);
                     if(data.expenses) expenses = JSON.parse(data.expenses);
                     if(data.todos) todos = JSON.parse(data.todos);
                     if(data.shoppingList) shoppingList = JSON.parse(data.shoppingList);
-                    if(data.memo) {
-                        const memoEl = document.getElementById('memo-area');
-                        if(memoEl) memoEl.value = data.memo;
-                    }
+                    if(data.memo) { const memoEl = document.getElementById('memo-area'); if(memoEl) memoEl.value = data.memo; }
 
-                    // Re-render based on current active tab
-                    // We simply call all render functions to be safe, they are fast enough
-                    // But to avoid flickering on current view, we check
-                    // Actually, just render everything is safer for sync consistency
-                    
-                    renderItinerary(); // Also handles day content
-                    renderPeople();
-                    renderSplitList();
-                    renderExpenses();
-                    updateTotalDisplay();
-                    renderTodos();
-                    renderShoppingList();
-                    // renderGuide(); // Removed Guide
-                    const memo = document.getElementById('memo-area');
-                    if(memo) extractLinks(memo.value);
+                    // Re-render current
+                    renderItinerary(); renderPeople(); renderSplitList(); renderExpenses(); updateTotalDisplay(); renderTodos(); renderShoppingList(); 
+                    const memo = document.getElementById('memo-area'); if(memo) extractLinks(memo.value);
                 }
             });
+        };
+        
+        window.updateSyncStatus = function(connected) {
+            const el = document.getElementById('sync-status-indicator');
+            if (connected) { el.innerHTML = '<i class="fa-solid fa-cloud mr-1 text-green-400"></i>已連線同步中'; } 
+            else { el.innerHTML = '<i class="fa-solid fa-mobile-screen mr-1 text-gray-400"></i>離線模式'; }
+        };
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            const analytics = getAnalytics(app);
+            
+            // Start listening
+            window.initFirebaseListener();
+            window.updateSyncStatus(true);
+        } catch (e) {
+            console.error("Firebase Init Error", e);
+            window.updateSyncStatus(false);
         }
 
-        // Hook into data saving functions to push to Cloud
+        // Hook into data saving
         window.saveDataToCloud = async function() {
-            if (!window.db) return; // Local mode only if db fail
-            
+            if (!window.db) return;
             const data = {
                 itinerary: JSON.stringify(itineraryData),
                 people: JSON.stringify(people),
@@ -459,12 +437,7 @@
                 shoppingList: JSON.stringify(shoppingList),
                 memo: document.getElementById('memo-area') ? document.getElementById('memo-area').value : ""
             };
-            
-            try {
-                await setDoc(doc(window.db, "trips", TRIP_ID), data, { merge: true });
-            } catch (e) {
-                console.error("Cloud Save Error", e);
-            }
+            try { await setDoc(doc(window.db, "trips", TRIP_ID), data, { merge: true }); } catch (e) { console.error(e); }
         }
     </script>
 
