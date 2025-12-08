@@ -11,7 +11,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="theme-color" content="#F0F9FF">
     
-    <!-- App Icon (Base64 placeholder, looks like a blue plane) -->
+    <!-- App Icon -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%2306B6D4'/%3E%3Cpath d='M352 256L160 128V384L352 256Z' fill='white'/%3E%3C/svg%3E">
     <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%2306B6D4'/%3E%3Cpath d='M352 256L160 128V384L352 256Z' fill='white'/%3E%3C/svg%3E">
 
@@ -71,7 +71,6 @@
             color: #164E63;
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
-            /* Safe area for iPhone X+ */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
@@ -172,14 +171,19 @@
                     <i class="fa-solid fa-money-bill-wave mr-2 text-muji-highlight"></i>新增公款支出
                 </h3>
                 <div class="space-y-4">
-                     <div class="flex gap-2">
+                     <div class="flex gap-2 items-center">
                         <div class="flex bg-gray-100 rounded-lg p-1 w-1/2">
                             <label class="flex-1 cursor-pointer"><input type="radio" name="split-currency" value="JPY" class="hidden split-currency-radio peer" checked><div class="text-center py-2 rounded-md text-xs font-bold text-gray-500 peer-checked:bg-muji-highlight peer-checked:text-white transition-all">JPY</div></label>
                             <label class="flex-1 cursor-pointer"><input type="radio" name="split-currency" value="TWD" class="hidden split-currency-radio peer"><div class="text-center py-2 rounded-md text-xs font-bold text-gray-500 peer-checked:bg-muji-highlight peer-checked:text-white transition-all">TWD</div></label>
                         </div>
-                        <div class="relative w-1/2">
+                        <div class="relative flex-1">
                             <span class="absolute left-2 top-2.5 text-xs text-gray-400">匯率</span>
-                            <input type="number" id="split-rate" step="0.001" placeholder="0.22" class="w-full bg-blue-50 border border-muji-border rounded-lg pl-10 pr-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition">
+                            <div class="flex">
+                                <input type="number" id="split-rate" step="0.001" placeholder="0.22" class="w-full bg-blue-50 border border-muji-border rounded-l-lg rounded-r-none pl-10 pr-1 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition">
+                                <button onclick="syncSplitRateFromWallet()" class="bg-gray-100 border border-l-0 border-muji-border rounded-r-lg px-2 text-xs text-gray-500 hover:bg-gray-200 transition" title="同步記帳匯率">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </button>
+                            </div>
                         </div>
                      </div>
                      <input type="text" id="split-item" placeholder="項目 (如: 晚餐、車資)" class="w-full bg-blue-50 border border-muji-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-muji-highlight transition">
@@ -221,7 +225,7 @@
                     <div>
                         <div class="text-xs text-blue-100 font-bold tracking-wider mb-1">今日匯率 (JPY → TWD)</div>
                         <div class="flex items-center">
-                            <input type="number" id="exchange-rate" step="0.001" class="bg-transparent border-b border-white/30 text-white text-2xl font-mono font-bold w-24 focus:outline-none focus:border-white transition" value="0.220" onchange="syncSplitRate()">
+                            <input type="number" id="exchange-rate" step="0.001" class="bg-transparent border-b border-white/30 text-white text-2xl font-mono font-bold w-24 focus:outline-none focus:border-white transition" value="0.220">
                             <button onclick="fetchLiveRate()" class="ml-2 bg-white/20 hover:bg-white/30 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
                         </div>
                         <div id="rate-status" class="text-[10px] text-blue-200 mt-1">更新中...</div>
@@ -394,14 +398,13 @@
                     if(data.itinerary) itineraryData = JSON.parse(data.itinerary);
                     if(data.people) people = JSON.parse(data.people);
                     if(data.splitExpenses) splitExpenses = JSON.parse(data.splitExpenses);
-                    if(data.expenses) expenses = JSON.parse(data.expenses);
-                    if(data.todos) todos = JSON.parse(data.todos);
-                    if(data.shoppingList) shoppingList = JSON.parse(data.shoppingList);
-                    if(data.memo) { const memoEl = document.getElementById('memo-area'); if(memoEl) memoEl.value = data.memo; }
+                    // NO sync for expenses, todos, shoppingList
 
-                    // Re-render current
-                    renderItinerary(); renderPeople(); renderSplitList(); renderExpenses(); updateTotalDisplay(); renderTodos(); renderShoppingList(); 
-                    const memo = document.getElementById('memo-area'); if(memo) extractLinks(memo.value);
+                    // Re-render
+                    renderItinerary(); renderPeople(); renderSplitList();
+                    // renderExpenses(); // Local
+                    // renderTodos(); // Local
+                    // renderShoppingList(); // Local
                 }
             });
         };
@@ -428,14 +431,12 @@
         // Hook into data saving
         window.saveDataToCloud = async function() {
             if (!window.db) return;
+            // Only sync shared data
             const data = {
                 itinerary: JSON.stringify(itineraryData),
                 people: JSON.stringify(people),
-                splitExpenses: JSON.stringify(splitExpenses),
-                expenses: JSON.stringify(expenses),
-                todos: JSON.stringify(todos),
-                shoppingList: JSON.stringify(shoppingList),
-                memo: document.getElementById('memo-area') ? document.getElementById('memo-area').value : ""
+                splitExpenses: JSON.stringify(splitExpenses)
+                // expenses, todos, shoppingList, memo are NOT synced
             };
             try { await setDoc(doc(window.db, "trips", TRIP_ID), data, { merge: true }); } catch (e) { console.error(e); }
         }
@@ -476,7 +477,10 @@
         
         function saveData(key, val) {
             localStorage.setItem(key, JSON.stringify(val));
-            if(window.saveDataToCloud) window.saveDataToCloud();
+            // Only sync if key is itinerary, people, or splitExpenses
+            if(['itinerary', 'people', 'splitExpenses'].includes(key) && window.saveDataToCloud) {
+                window.saveDataToCloud();
+            }
         }
 
         /* --- 1. RENDER ITINERARY --- */
@@ -729,6 +733,16 @@
              document.getElementById('settlement-results').innerHTML = res.length ? res.map(t=>`<p class="border-b border-white/20 pb-2">${t}</p>`).join('') : '<p class="text-white/80">已平衡</p>';
         }
 
+        // Sync Rate to Split
+        function syncSplitRateFromWallet() {
+             const globalRate = document.getElementById('exchange-rate').value;
+             const splitRateInput = document.getElementById('split-rate');
+             if(splitRateInput) {
+                 splitRateInput.value = globalRate;
+                 alert("已同步匯率: " + globalRate);
+             }
+        }
+
         /* --- 3. BOOKKEEPING --- */
         let currentExpensePhoto = null;
         let editingExpenseId = null;
@@ -741,8 +755,6 @@
                 document.getElementById('exchange-rate').value = d.rates.TWD;
                 document.getElementById('rate-status').innerText = "已更新";
                 updateTotalDisplay();
-                const splitRate = document.getElementById('split-rate');
-                if(splitRate && !splitRate.value) splitRate.value = d.rates.TWD;
             } catch(e) { document.getElementById('rate-status').innerText = "失敗"; }
         }
 
@@ -970,7 +982,68 @@
             window.scrollTo(0, 0);
         }
 
-        const japanesePhrases = [{category:"基本",items:[{jp:"こんにちは",roma:"Konnichiwa",tw:"你好"},{jp:"ありがとう",roma:"Arigatou",tw:"謝謝"},{jp:"すみません",roma:"Sumimasen",tw:"不好意思"}]},{category:"交通",items:[{jp:"ここはどこですか",roma:"Koko wa doko desuka",tw:"這裡是哪裡"},{jp:"トイレはどこですか",roma:"Toire wa doko desuka",tw:"廁所在哪"}]},{category:"購物",items:[{jp:"いくらですか",roma:"Ikura desuka",tw:"多少錢"},{jp:"これをください",roma:"Kore o kudasai",tw:"我要這個"}]}];
+        const japanesePhrases = [
+            { category: "基本問候", items: [
+                { jp: "こんにちは", roma: "Konnichiwa", tw: "你好" },
+                { jp: "ありがとう", roma: "Arigatou", tw: "謝謝" },
+                { jp: "すみません", roma: "Sumimasen", tw: "不好意思 / 請問" },
+                { jp: "はい / いいえ", roma: "Hai / Iie", tw: "是 / 不是" },
+                { jp: "お願いします", roma: "Onegaishimasu", tw: "拜託了 / 麻煩你" }
+            ]},
+            { category: "交通移動", items: [
+                { jp: "この電車は〜に行きますか？", roma: "Kono densha wa ~ ni ikimasuka?", tw: "這班電車會到～嗎？" },
+                { jp: "チケット売り場はどこですか？", roma: "Chiketto uriba wa doko desuka?", tw: "售票處在哪裡？" },
+                { jp: "〜までお願いします", roma: "~ made onegaishimasu", tw: "請載我到～ (計程車)" },
+                { jp: "ここで降ろしてください", roma: "Koko de oroshite kudasai", tw: "請在這裡讓我下車" }
+            ]},
+            { category: "住宿飯店", items: [
+                { jp: "チェックインをお願いします", roma: "Chekku-in o onegaishimasu", tw: "麻煩辦理入住" },
+                { jp: "荷物を預かってもらえますか？", roma: "Nimotsu o azukatte moraemasuka?", tw: "可以寄放行李嗎？" },
+                { jp: "Wi-Fiのパスワードは何ですか？", roma: "Wi-Fi no pasuwado wa nan desuka?", tw: "Wi-Fi 密碼是多少？" },
+                { jp: "チェックアウトは何時ですか？", roma: "Chekku-auto wa nanji desuka?", tw: "退房是幾點？" }
+            ]},
+            { category: "餐廳用餐", items: [
+                { jp: "メニューをください", roma: "Menyu o kudasai", tw: "請給我菜單" },
+                { jp: "これをお願いします", roma: "Kore o onegaishimasu", tw: "我要點這個" },
+                { jp: "お水をください", roma: "Omizu o kudasai", tw: "請給我水" },
+                { jp: "お会計をお願いします", roma: "Okaikei o onegaishimasu", tw: "麻煩結帳" },
+                { jp: "ごちそうさまでした", roma: "Gochisousama deshita", tw: "多謝款待 (吃飽後說)" }
+            ]},
+            { category: "購物結帳", items: [
+                { jp: "これはいくらですか？", roma: "Kore wa ikura desuka?", tw: "這個多少錢？" },
+                { jp: "免税になりますか？", roma: "Menzei ni narimasuka?", tw: "可以免稅嗎？" },
+                { jp: "袋はいりません", roma: "Fukuro wa irimasen", tw: "不用袋子" },
+                { jp: "クレジットカードは使えますか？", roma: "Kurejitto kado wa tsukaemasuka?", tw: "可以用信用卡嗎？" }
+            ]},
+            { category: "緊急求助", items: [
+                { jp: "助けてください！", roma: "Tasukete kudasai!", tw: "請救救我！" },
+                { jp: "警察を呼んでください", roma: "Keisatsu o yonde kudasai", tw: "請幫我叫警察" },
+                { jp: "救急車を呼んでください", roma: "Kyukyusha o yonde kudasai", tw: "請幫我叫救護車" },
+                { jp: "トイレはどこですか？", roma: "Toire wa doko desuka?", tw: "廁所在哪裡？" }
+            ]},
+            { category: "數字", items: [
+                { jp: "いち (1), に (2), さん (3)", roma: "Ichi, Ni, San", tw: "1, 2, 3" },
+                { jp: "し/よん (4), ご (5), ろく (6)", roma: "Yon, Go, Roku", tw: "4, 5, 6" },
+                { jp: "しち/なな (7), はち (8), きゅう (9)", roma: "Nana, Hachi, Kyuu", tw: "7, 8, 9" },
+                { jp: "じゅう (10), ひゃく (100)", roma: "Juu, Hyaku", tw: "10, 100" },
+                { jp: "せん (1000), まん (10000)", roma: "Sen, Man", tw: "1000, 10000" }
+            ]},
+            { category: "時間", items: [
+                { jp: "いま、なんじですか？", roma: "Ima, nanji desuka?", tw: "現在幾點？" },
+                { jp: "いつですか？", roma: "Itsu desuka?", tw: "什麼時候？" },
+                { jp: "きょう / あした / きのう", roma: "Kyou / Ashita / Kinou", tw: "今天 / 明天 / 昨天" }
+            ]},
+            { category: "自我介紹", items: [
+                { jp: "わたしは〜です", roma: "Watashi wa ~ desu", tw: "我是～" },
+                { jp: "台湾から来ました", roma: "Taiwan kara kimashita", tw: "我來自台灣" },
+                { jp: "日本語がわかりません", roma: "Nihongo ga wakarimasen", tw: "我不懂日語" }
+            ]},
+            { category: "觀光", items: [
+                { jp: "写真を撮ってもいいですか？", roma: "Shashin o totte mo ii desuka?", tw: "可以拍照嗎？" },
+                { jp: "おすすめはありますか？", roma: "Osusume wa arimasuka?", tw: "有推薦的嗎？" },
+                { jp: "近くに駅はありますか？", roma: "Chikaku ni eki wa arimasuka?", tw: "附近有車站嗎？" }
+            ]}
+        ];
 
         function renderJapanesePhrases() {
             document.getElementById('japanese-phrases-container').innerHTML = japanesePhrases.map((c,i) => `
@@ -999,7 +1072,9 @@
             renderJapanesePhrases();
             extractLinks(memoArea.value);
             updateTotalDisplay();
+            // Try fetch rate on load
             fetchLiveRate();
+            window.fetchLiveRate = fetchLiveRate;
             
             // Re-init listener if config exists
             if(window.db) initFirebaseListener();
